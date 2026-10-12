@@ -8,11 +8,11 @@ const statusInfo = document.getElementById('statusInfo');
 const compass = document.getElementById('compass');
 const qiblaArrow = document.getElementById('qiblaArrow');
 
-// Rumus Great Circle Bearing untuk hitung arah kiblat
-function calculateQiblaBearing(userLat, userLng) {
-  const phi1 = userLat * (Math.PI / 180);
+// 1. Perhitungan Great Circle Bearing untuk Arah Kiblat
+function calculateQiblaBearing(lat, lng) {
+  const phi1 = lat * (Math.PI / 180);
   const phi2 = MECCA_LAT * (Math.PI / 180);
-  const lambda1 = userLng * (Math.PI / 180);
+  const lambda1 = lng * (Math.PI / 180);
   const lambda2 = MECCA_LNG * (Math.PI / 180);
 
   const y = Math.sin(lambda2 - lambda1);
@@ -22,65 +22,94 @@ function calculateQiblaBearing(userLat, userLng) {
   return (qibla + 360) % 360;
 }
 
-// Dapatkan koordinat lokasi user via GPS
-function getLocation() {
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        qiblaBearing = calculateQiblaBearing(lat, lng);
-        statusInfo.textContent = `Arah Kiblat: ${qiblaBearing.toFixed(1)}° dari Utara. Putar HP kamu.`;
-        initCompass();
-      },
-      (error) => {
-        statusInfo.textContent = 'Gagal mengambil lokasi. Pastikan izin GPS aktif.';
-      }
-    );
-  } else {
-    statusInfo.textContent = 'Geolocation tidak didukung di browser ini.';
+// 2. Mengambil Akses Lokasi GPS User
+function requestLocation() {
+  if (!navigator.geolocation) {
+    statusInfo.textContent = 'Browser kamu tidak mendukung akses lokasi/GPS.';
+    return;
   }
+
+  statusInfo.textContent = 'Mencari posisi GPS... Pastikan izin GPS aktif.';
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      
+      qiblaBearing = calculateQiblaBearing(lat, lng);
+      statusInfo.textContent = `Arah Kiblat: ${qiblaBearing.toFixed(1)}° dari Utara. Putar/gerakkan HP kamu.`;
+
+      setupCompass();
+    },
+    (error) => {
+      console.error('Error Geolocation:', error);
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          statusInfo.textContent = 'Izin lokasi ditolak. Buka setelan browser untuk mengizinkan akses lokasi.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          statusInfo.textContent = 'Informasi lokasi tidak ditemukan. Pastikan GPS HP kamu aktif.';
+          break;
+        case error.TIMEOUT:
+          statusInfo.textContent = 'Waktu permintaan lokasi habis. Silakan klik tombol kembali.';
+          break;
+        default:
+          statusInfo.textContent = 'Gagal mendeteksi lokasi.';
+      }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 }
 
-// Inisialisasi sensor kompas HP
-function initCompass() {
+// 3. Mengaktifkan Sensor Orientasi / Kompas
+function setupCompass() {
+  // Dukungan Khusus iOS Safari
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // Penanganan khusus untuk browser iOS (Safari)
     DeviceOrientationEvent.requestPermission()
       .then((permissionState) => {
         if (permissionState === 'granted') {
-          window.addEventListener('deviceorientation', handleOrientation);
+          window.addEventListener('deviceorientation', handleOrientation, true);
         } else {
-          statusInfo.textContent = 'Izin akses sensor gerak ditolak.';
+          statusInfo.textContent = 'Izin sensor gerak/kompas ditolak di peramban iOS.';
         }
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        statusInfo.textContent = 'Gagal meminta izin kompas di perangkat ini.';
+      });
   } else {
-    // Browser standar / Android
-    window.addEventListener('deviceorientationabsolute', handleOrientation, true) ||
-    window.addEventListener('deviceorientation', handleOrientation, true);
+    // Dukungan Android & Browser Standar
+    if ('ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+    } else if ('ondeviceorientation' in window) {
+      window.addEventListener('deviceorientation', handleOrientation, true);
+    } else {
+      statusInfo.textContent = 'Perangkat ini tidak memiliki sensor magnetometer/kompas.';
+    }
   }
 }
 
-// Putar elemen visual kompas sesuai orientasi HP
+// 4. Update Tampilan Rotasi Kompas & Panah Kiblat
 function handleOrientation(event) {
-  let alpha = event.alpha;
-  
-  // Ambil heading khusus perangkat iOS jika ada
+  let heading = null;
+
   if (event.webkitCompassHeading) {
-    alpha = event.webkitCompassHeading;
+    // iOS Safari
+    heading = event.webkitCompassHeading;
+  } else if (event.absolute && event.alpha !== null) {
+    // Android Absolute Compass
+    heading = 360 - event.alpha;
+  } else if (event.alpha !== null) {
+    heading = 360 - event.alpha;
   }
 
-  if (alpha !== null && alpha !== undefined) {
-    // Memutar piringan kompas ke arah Utara
-    compass.style.transform = `rotate(${-alpha}deg)`;
-    
-    // Memutar panah hijau ke arah derajat kiblat
+  if (heading !== null) {
+    compass.style.transform = `rotate(${-heading}deg)`;
     qiblaArrow.style.transform = `rotate(${qiblaBearing}deg)`;
   }
 }
 
+// Event Listener Tombol Utama
 btnStart.addEventListener('click', () => {
-  statusInfo.textContent = 'Mengambil lokasi...';
-  getLocation();
+  requestLocation();
 });
