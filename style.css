@@ -2,7 +2,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -10,21 +10,45 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f4f6f8;
-  color: #333;
+  background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+  color: #f8fafc;
+  padding: 20px;
 }
 
 .container {
-  text-align: center;
-  padding: 20px;
-  max-width: 400px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 24px;
+  padding: 32px 24px;
+  max-width: 420px;
   width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-.compass-container {
-  margin: 30px auto;
-  width: 250px;
-  height: 250px;
+.header .symbol {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fbbf24;
+  letter-spacing: 0.5px;
+}
+
+.header .subtitle {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.compass-wrapper {
+  margin: 36px auto;
+  width: 240px;
+  height: 240px;
   position: relative;
 }
 
@@ -32,50 +56,86 @@ body {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 8px solid #2c3e50;
-  background-color: #ffffff;
+  border: 6px solid #d4af37;
+  background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
   position: relative;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  transition: transform 0.1s ease-out;
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
+  transition: transform 0.15s cubic-bezier(0.1, 0.1, 0.25, 1);
 }
 
-.north {
+.cardinal {
   position: absolute;
+  font-weight: 700;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.cardinal.north {
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  font-weight: bold;
-  color: #e74c3c;
+  color: #ef4444;
+}
+
+.cardinal.east {
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.cardinal.south {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cardinal.west {
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .qibla-arrow {
   position: absolute;
   top: 50%;
   left: 50%;
-  font-size: 48px;
-  color: #27ae60;
+  font-size: 52px;
+  color: #10b981;
+  text-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
   transform-origin: center center;
-  margin-left: -24px;
-  margin-top: -24px;
-  transition: transform 0.1s ease-out;
+  margin-left: -26px;
+  margin-top: -26px;
+  transition: transform 0.15s cubic-bezier(0.1, 0.1, 0.25, 1);
 }
 
-button {
-  padding: 12px 24px;
-  font-size: 16px;
-  background-color: #27ae60;
-  color: white;
+.btn-primary {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #d4af37 0%, #b48811 100%);
+  color: #0f172a;
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
-  margin-bottom: 15px;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+  transition: all 0.2s ease;
 }
 
-button:hover {
-  background-color: #219150;
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.status-box {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #statusInfo {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.5;
 }
