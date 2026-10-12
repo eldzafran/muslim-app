@@ -477,7 +477,6 @@
       if (mapContainer.style.display === 'none' || mapContainer.style.display === '') {
         mapContainer.style.display = 'block';
         toggleMapBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Sembunyikan Peta';
-
         if (!map && userLat && userLng) {
           map = L.map('mapContainer').setView([userLat, userLng], 13);
 
